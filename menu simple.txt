@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Menu - Burger Hut</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans', sans-serif;
+        }
+        body {
+            background-image: url("img/hero-background.jpg");
+            background-size: cover;
+        }
+        header {
+            background-color: #070e16;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .logo img {
+            height: 60px;
+            margin-left: 50px;
+        }
+        nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        nav ul li {
+            display: inline-block;
+            margin-right: 15px;
+        }
+        nav ul li a {
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+        nav ul li a:hover {
+            color: #ff0000;
+        }
+        .search-sort-container {
+            display: flex;
+            align-items: center;
+        }
+        .search-sort-container input,
+        .search-sort-container select,
+        .search-sort-container button {
+            margin-left: 0.5rem;
+        }
+        .menu {
+            padding: 2rem;
+            text-align: center;
+        }
+        .menu h2 {
+            font-size: 36px;
+            margin-bottom: 40px;
+            color: #ffffff;
+        }
+        .menu-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+        }
+        .menu-item {
+            position: relative;
+            width: calc(25% - 1rem); /* Ensure 4 items per row */
+            height: 300px;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            background-color: #333;
+            transition: transform 0.3s ease, margin 0.3s ease;
+        }
+        .menu-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .menu-item:hover {
+            transform: scale(1.1);
+            margin: -0.5rem;
+            z-index: 1;
+        }
+        .menu-item .card-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            text-align: center;
+            border-radius: 0 0 0.5rem 0.5rem;
+        }
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .button-group .btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 14px;
+            background-color: #ff9800;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .button-group .btn:hover {
+            background-color: #e68900;
+            transform: translateY(-2px);
+        }
+        .footer {
+            background-color: #070e16;
+            padding: 40px 0;
+            color: #fff;
+            text-align: center;
+        }
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+        .footer-logo img {
+            max-width: 150px;
+        }
+        .footer-links a {
+            color: #fff;
+            margin: 0 10px;
+            text-decoration: none;
+        }
+        .footer-social a {
+            color: #fff;
+            margin: 0 5px;
+            text-decoration: none;
+        }
+        .footer-text {
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="img/iconlogo.png" alt="Burger Hut Logo">
+        </div>
+        <nav>
+            <ul>
+                <li>
+                    <div class="search-sort-container">
+                        <form action="menu.php" method="POST">
+                            <input type="text" name="psearch" placeholder="Search menu...">
+                            <select name="sort">
+                                <option value="">Sort by</option>
+                                <option value="price_asc">Price: Low to High</option>
+                                <option value="price_desc">Price: High to Low</option>
+                                <option value="date_asc">Date: Old to New</option>
+                                <option value="date_desc">Date: New to Old</option>
+                                <option value="name_asc">Name: A to Z</option>
+                                <option value="name_desc">Name: Z to A</option>
+                            </select>
+                            <button type="submit" name="submit">Search</button>
+                        </form>
+                    </div>
+                </li>
+            </ul>
+        </nav>
+    </header>
+    <section class="menu">
+        <h2>Our Menu</h2>
+        <ul class="menu-items">
+            <?php
+            $con = mysqli_connect("localhost:3307", "root", "", "burger");
+            if (!$con) {
+                die("Connection failed: " . mysqli_connect_error());
+            }
+            $sql = "SELECT * FROM fast_food";
+            if (isset($_POST['submit'])) {
+                if (!empty($_POST['psearch'])) {
+                    $search = mysqli_real_escape_string($con, $_POST['psearch']);
+                    $sql .= " WHERE p_name LIKE '%$search%'";
+                }
+                if (!empty($_POST['sort'])) {
+                    $sort = $_POST['sort'];
+                    switch ($sort) {
+                        case 'price_asc':
+                            $sql .= " ORDER BY p_price ASC";
+                            break;
+                        case 'price_desc':
+                            $sql .= " ORDER BY p_price DESC";
+                            break;
+                        case 'date_asc':
+                            $sql .= " ORDER BY p_date ASC";
+                            break;
+                        case 'date_desc':
+                            $sql .= " ORDER BY p_date DESC";
+                            break;
+                        case 'name_asc':
+                            $sql .= " ORDER BY p_name ASC";
+                            break;
+                        case 'name_desc':
+                            $sql .= " ORDER BY p_name DESC";
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            $result = mysqli_query($con, $sql);
+            if (mysqli_num_rows($result) > 0) {
+                while ($data = mysqli_fetch_assoc($result)) {
+                    echo "<li class='menu-item'>";
+                    echo "<img src='{$data['p_img']}' alt='{$data['p_name']}'>";
+                    echo "<div class='card-content'>";
+                    echo "<h3>{$data['p_name']}</h3>";
+                    echo "<p>{$data['p_detail']}</p>";
+                    echo "<p>Price: $ {$data['p_price']}</p>";
+                    echo "<div class='button-group'>";
+                    echo "<form method='POST' action='buynow.php'>";
+                    echo "<input type='hidden' name='product_id' value='{$data['id']}'>";
+                    echo "<button type='submit' class='btn buy-now'>Buy Now</button>";
+                    echo "</form>";
+                    echo "<form method='POST' action='cart.php'>";
+                    echo "<input type='hidden' name='product_id' value='{$data['id']}'>";
+                    echo "<button type='submit' class='btn add-to-cart'>Add to Cart</button>";
+                    echo "</form>";
+                    echo "</div>";
+                    echo "</div>";
+                    echo "</li>";
+                }
+            } else {
+                echo "<p class='no-products'>No products found.</p>";
+            }
+            mysqli_close($con);
+            ?>
+        </ul>
+    </section>
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">
+                <img src="img/iconlogo.png" alt="Logo">
+            </div>
+            <nav class="footer-links">
+                <a href="index.php#home">Home</a>
+                <a href="index.php#about">About</a>
+                <a href="menu.php">Menu</a>
+                <a href="index.php#reservations">Reservations</a>
+                <a href="index.php#testimonials">Testimonials</a>
+                <a href="index.php#gallery">Gallery</a>
+                <a href="index.php#contact">Contact</a>
+            </nav>
+            <div class="footer-social">
+                <a href="#"><i class="fab fa-facebook"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+            </div>
+        </div>
+        <p
